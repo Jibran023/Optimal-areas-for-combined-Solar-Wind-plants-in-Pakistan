@@ -1,55 +1,55 @@
 
 var cities = { // dictionary of cities and their coordinates
-    'Islamabad': [73.0479, 33.6844],
-    'Karachi': [67.0011, 24.8607],
-    'Lahore': [74.3587, 31.5204],
-    'Peshawar': [71.5249, 34.0150],
-    'Quetta': [66.9750, 30.1798],
-    'Multan': [71.4753, 30.1575],
-    'Faisalabad': [73.0645, 31.4504],
-    'Rawalpindi': [73.0479, 33.5651],
-    'Hyderabad': [68.3667, 25.3969],
-    'Sialkot': [74.5319, 32.4926],
-    'Gujranwala': [74.1829, 32.1614],
-    'Sukkur': [68.8498, 27.7131],
-    'Larkana': [68.2068, 27.5589],
-    'Bahawalpur': [71.7167, 29.3956],
-    'Mardan': [72.0281, 34.2012],
-    'Abbottabad': [73.2145, 34.1463],
-    'Gwadar': [62.3250, 25.1216],
-    'Muzaffarabad': [73.4853, 34.3595],
-    'Gilgit': [74.3247, 35.9208],
-    'Skardu': [75.6333, 35.2971],
-    'Chitral': [71.7858, 35.8511],
-    'Dera Ismail Khan': [70.9128, 31.8313],
-    'Kohat': [71.4333, 33.5833],
-    'Swat': [72.4333, 35.2167],
-    'Mirpur': [73.7510, 33.1437],
-    'Jacobabad': [68.4378, 28.2769],
-    'Khuzdar': [66.3597, 27.8000],
-    'Turbat': [63.0500, 26.0031],
-    'Zhob': [69.4667, 31.3500],
-    'Chaman': [66.4500, 30.9167]
+  'Islamabad': [73.0479, 33.6844],
+  'Karachi': [67.0011, 24.8607],
+  'Lahore': [74.3587, 31.5204],
+  'Peshawar': [71.5249, 34.0150],
+  'Quetta': [66.9750, 30.1798],
+  'Multan': [71.4753, 30.1575],
+  'Faisalabad': [73.0645, 31.4504],
+  'Rawalpindi': [73.0479, 33.5651],
+  'Hyderabad': [68.3667, 25.3969],
+  'Sialkot': [74.5319, 32.4926],
+  'Gujranwala': [74.1829, 32.1614],
+  'Sukkur': [68.8498, 27.7131],
+  'Larkana': [68.2068, 27.5589],
+  'Bahawalpur': [71.7167, 29.3956],
+  'Mardan': [72.0281, 34.2012],
+  'Abbottabad': [73.2145, 34.1463],
+  'Gwadar': [62.3250, 25.1216],
+  'Muzaffarabad': [73.4853, 34.3595],
+  'Gilgit': [74.3247, 35.9208],
+  'Skardu': [75.6333, 35.2971],
+  'Chitral': [71.7858, 35.8511],
+  'Dera Ismail Khan': [70.9128, 31.8313],
+  'Kohat': [71.4333, 33.5833],
+  'Swat': [72.4333, 35.2167],
+  'Mirpur': [73.7510, 33.1437],
+  'Jacobabad': [68.4378, 28.2769],
+  'Khuzdar': [66.3597, 27.8000],
+  'Turbat': [63.0500, 26.0031],
+  'Zhob': [69.4667, 31.3500],
+  'Chaman': [66.4500, 30.9167]
 };
 
 var cityDropdown = ui.Select({ // dropdown from the city names
-  items: Object.keys(cities),
-  placeholder: 'Select a city',
-  onChange: function(cityName) {
-    var coords = cities[cityName];
-    Map.setCenter(coords[0], coords[1], 10);
+items: Object.keys(cities),
+placeholder: 'Select a city',
+onChange: function(cityName) {
+  var coords = cities[cityName];
+  Map.setCenter(coords[0], coords[1], 10);
 
-    var point = ee.Geometry.Point(coords);
-    Map.layers().reset();
-    Map.addLayer(point, {color: 'red'}, cityName + ' Location');
-  
-  }
+  var point = ee.Geometry.Point(coords);
+  Map.layers().reset();
+  // Map.addLayer(point, {color: 'red'}, cityName + ' Location');
+
+}
 });
 
 cityDropdown.setValue('Lahore');
 
 var populationThresholdInput = ui.Textbox({
-  placeholder: 'Population threshold'
+placeholder: 'Population threshold'
 });
 
 var solarMinInput = ui.Textbox({placeholder: 'Solar Min (e.g. 0)'}); // solar Radiation Range Inputs (in Watts/m^2)
@@ -58,371 +58,392 @@ var solarMaxInput = ui.Textbox({placeholder: 'Solar Max (e.g. 222)'});
 var windMinInput = ui.Textbox({placeholder: 'Wind Min (e.g. 0)'}); // wind Speed Range Inputs (in m/s)
 var windMaxInput = ui.Textbox({placeholder: 'Wind Max (e.g. 3.8)'});
 
-var bufferSize1Input = ui.Textbox({placeholder: 'distance = 20 (e.g.20km)'});
-var bufferSize2Input = ui.Textbox({placeholder: 'distance = 50 (e.g.50km)'});
+var bufferSize1Input = ui.Textbox({placeholder: 'distance = 20'});
+var bufferSize2Input = ui.Textbox({placeholder: 'distance = 50'});
 
 function validateInputs() {
-  
-  var populationThreshold = parseInt(populationThresholdInput.getValue()); 
-  var solarMin = parseFloat(solarMinInput.getValue()); // we get the user inputs
-  var solarMax = parseFloat(solarMaxInput.getValue());
-  var windMin = parseFloat(windMinInput.getValue());
-  var windMax = parseFloat(windMaxInput.getValue());
-  var bufferSize1 = parseFloat(bufferSize1Input.getValue());
-  var bufferSize2 = parseFloat(bufferSize2Input.getValue());
-  
-  if (!populationThresholdInput.getValue() || 
-      !solarMinInput.getValue() || 
-      !solarMaxInput.getValue() || 
-      !windMinInput.getValue() || 
-      !windMaxInput.getValue() || 
-      !bufferSize1Input.getValue() || 
-      !bufferSize2Input.getValue()) {
-    alert('Error: All fields must be filled in.');
-    return false;
-  }
 
-  if (solarMin < 0 || solarMax < 0 || solarMin > solarMax || solarMax > 222) { // we validate solar radiation inputs
-    alert('Error: Solar radiation values must be non-negative and Solar Min should not exceed Solar Max. Solar Range: 0 - 222');
-    return false; 
-  }
-  
-  if (windMin < 0 || windMax < 0 || windMin > windMax || windMax > 3.8) { // we validate wind speed inputs
-    alert('Error: Wind speed values must be non-negative and Wind Min should not exceed Wind Max. Wind Range: 0 - 3.8');
-    return false; 
-  }
+var populationThreshold = parseInt(populationThresholdInput.getValue()); 
+var solarMin = parseFloat(solarMinInput.getValue()); // we get the user inputs
+var solarMax = parseFloat(solarMaxInput.getValue());
+var windMin = parseFloat(windMinInput.getValue());
+var windMax = parseFloat(windMaxInput.getValue());
+var bufferSize1 = parseFloat(bufferSize1Input.getValue());
+var bufferSize2 = parseFloat(bufferSize2Input.getValue());
 
-  if (bufferSize1 <= 0 || bufferSize2 <= 0) { // we validate buffer size inputs
-    alert('Error: Buffer sizes must be positive values.');
-    return false; 
-  }
-  
-  if (populationThreshold < 0 || populationThreshold > 1156){
-    alert('Error: Population threshold cannot be less than 0.');
-    return false;
-  }
-  
-  return true; // if all validations pass, return true
+if (!populationThresholdInput.getValue() || 
+    !solarMinInput.getValue() || 
+    !solarMaxInput.getValue() || 
+    !windMinInput.getValue() || 
+    !windMaxInput.getValue() || 
+    !bufferSize1Input.getValue() || 
+    !bufferSize2Input.getValue()) {
+  alert('Error: All fields must be filled in.');
+  return false;
+}
+
+if (solarMin < 0 || solarMax < 0 || solarMin > solarMax || solarMax > 222) { // we validate solar radiation inputs
+  alert('Error: Solar radiation values must be non-negative and Solar Min should not exceed Solar Max. Solar Range: 0 - 222');
+  return false; 
+}
+
+if (windMin < 0 || windMax < 0 || windMin > windMax || windMax > 3.8) { // we validate wind speed inputs
+  alert('Error: Wind speed values must be non-negative and Wind Min should not exceed Wind Max. Wind Range: 0 - 3.8');
+  return false; 
+}
+
+if (bufferSize1 <= 0 || bufferSize2 <= 0) { // we validate buffer size inputs
+  alert('Error: Buffer sizes must be positive values.');
+  return false; 
+}
+
+if (populationThreshold < 0 || populationThreshold > 1156){
+  alert('Error: Population threshold cannot be less than 0.');
+  return false;
+}
+
+return true; // if all validations pass, return true
 }
 
 function applyFilters() {
-  
-  if (!validateInputs()) {
-    return; // if validation fails, we stop here
-  }
- 
-  var selectedCity = cityDropdown.getValue();
-  var coords = cities[selectedCity];
-  var point = ee.Geometry.Point(coords);
-  Map.setCenter(coords[0], coords[1], 8);
-  
-  var populationThreshold = parseInt(populationThresholdInput.getValue()); 
-  var solarMin = parseFloat(solarMinInput.getValue());
-  var solarMax = parseFloat(solarMaxInput.getValue());
-  var windMin = parseFloat(windMinInput.getValue());
-  var windMax = parseFloat(windMaxInput.getValue());
 
-  var bufferSize1 = parseInt(bufferSize1Input.getValue()) * 1000;  
-  var bufferSize2 = parseInt(bufferSize2Input.getValue()) * 1000;  
-  
-  var bufferedCity1 = point.buffer(bufferSize1); 
-  var bufferedCity2 = point.buffer(bufferSize2);
+if (!validateInputs()) {
+  return; // if validation fails, we stop here
+}
 
-  var insideBuffer2 = bufferedCity2;
-  var outsideBuffer1 = bufferedCity2.difference(bufferedCity1);  // subtract Buffer 1 from Buffer 2 = Area between two buffers
-  
-  var start_date = '1985-01-01'; 
-  var end_date = '2025-03-01'; 
-  var Pak_Districts = ee.FeatureCollection("projects/ee-jibranshiekh04/assets/pakistan_districts_new"); 
+var selectedCity = cityDropdown.getValue();
+var coords = cities[selectedCity];
+var point = ee.Geometry.Point(coords);
+Map.setCenter(coords[0], coords[1], 8);
 
-  var secondsInMonth = 30 * 24 * 3600;
-  
-  // ERA 5 data
-  var dataset = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR').filterDate(start_date, end_date);
-    
-  var solar1 = dataset.select('surface_net_solar_radiation_sum').mean().clip(Pak_Districts).divide(secondsInMonth);
-  var solarRadiationFilter1 = solar1.gte(solarMin).and(solar1.lte(solarMax));
-  var solar2 = dataset.select('surface_net_solar_radiation_sum').mean().clip(outsideBuffer1).divide(secondsInMonth);
-  var solarRadiationFilter2 = solar2.gte(solarMin).and(solar2.lte(solarMax));
-  var solar = solar2.and(solar1)
-  
-  
-  var wind_u = dataset.select('u_component_of_wind_10m').mean();
-  var wind_v = dataset.select('v_component_of_wind_10m').mean();
-  
-  var windSpeed1 = wind_u.pow(2).add(wind_v.pow(2)).sqrt().clip(Pak_Districts);
-  var windSpeedFilterpak = windSpeed1.gte(windMin).and(windSpeed1.lte(windMax));
-  var windSpeed2 = wind_u.pow(2).add(wind_v.pow(2)).sqrt().clip(outsideBuffer1);
-  var windSpeedFilterbuf = windSpeed2.gte(windMin).and(windSpeed2.lte(windMax));
-  
-  var windSpeed = windSpeedFilterpak.and(windSpeedFilterbuf)
-  
-  var windDir1 = wind_u.atan2(wind_v).multiply(180 / Math.PI).add(180).clip(Pak_Districts);
-  var southwestWindpak = windDir1.gt(180).and(windDir1.lt(270));
-  var northeastWindpak = windDir1.gt(0).and(windDir1.lt(90));
-  var windDirMask1 = southwestWindpak.or(northeastWindpak);
-  
-  var windDir2 = wind_u.atan2(wind_v).multiply(180 / Math.PI).add(180).clip(outsideBuffer1);
-  var southwestWindbuf = windDir2.gt(180).and(windDir2.lt(270));
-  var northeastWindbuf = windDir2.gt(0).and(windDir2.lt(90));
-  var windDirMask2 = southwestWindbuf.or(northeastWindbuf);
-  
-  // var windDir = windDir2.and(windDir1)
+var populationThreshold = parseInt(populationThresholdInput.getValue()); 
+var solarMin = parseFloat(solarMinInput.getValue());
+var solarMax = parseFloat(solarMaxInput.getValue());
+var windMin = parseFloat(windMinInput.getValue());
+var windMax = parseFloat(windMaxInput.getValue());
 
-  // wind direction filters
-  
-  
-  
-  // var southwestWind = windDir.gt(180).and(windDir.lt(270));
-  // var northeastWind = windDir.gt(0).and(windDir.lt(90));
-  var windDirMask;
+var bufferSize1 = parseInt(bufferSize1Input.getValue()) * 1000;  
+var bufferSize2 = parseInt(bufferSize2Input.getValue()) * 1000;  
 
-  windDirMask = windDirMask2.and(windDirMask1);
+var bufferedCity1 = point.buffer(bufferSize1); 
+var bufferedCity2 = point.buffer(bufferSize2);
 
-  // wind speed filter
-  var windSpeedFilter = windSpeedFilterbuf.and(windSpeedFilterpak)
-  var filteredWind = windSpeedFilter.and(windDirMask);
+var insideBuffer2 = bufferedCity2;
+var outsideBuffer1 = bufferedCity2.difference(bufferedCity1);  // subtract Buffer 1 from Buffer 2 = Area between two buffers
 
-  // solar radiation filter
-  var solarRadiationFilter = solarRadiationFilter2.and(solarRadiationFilter1)
+var start_date = '1985-01-01'; 
+var end_date = '2025-03-01'; 
+var Pak_Districts = ee.FeatureCollection("projects/ee-jibranshiekh04/assets/pakistan_districts_new"); 
 
-  // final combined filter
-  var finalFiltered = solarRadiationFilter.and(filteredWind);
+var secondsInMonth = 30 * 24 * 3600;
 
-  // -------------------------------------------------------------------------------------------------------------------------
+// ERA 5 data
+var dataset = ee.ImageCollection('ECMWF/ERA5_LAND/MONTHLY_AGGR').filterDate(start_date, end_date);
   
-  // Population data for 2025
-  var image2025 = ee.Image('JRC/GHSL/P2023A/GHS_POP/2025').select('population_count');
-  var population2025_1 = image2025.clip(Pak_Districts);
-  var population2025_2 = image2025.clip(outsideBuffer1);
-  var population2025 = population2025_2.and(population2025_1)
-  var populationMasked = population2025.updateMask(population2025.gte(0)); // we mask out values less than 0
-  
-  var populationThresholdlocal = populationThreshold;
-  var populationFiltered = populationMasked.lte(populationThresholdlocal); // we filter areas with population <= threshold
+var solar1 = dataset.select('surface_net_solar_radiation_sum').mean().clip(Pak_Districts).divide(secondsInMonth);
+var solarRadiationFilter1 = solar1.gte(solarMin).and(solar1.lte(solarMax));
+var solar2 = dataset.select('surface_net_solar_radiation_sum').mean().clip(outsideBuffer1).divide(secondsInMonth);
+var solarRadiationFilter2 = solar2.gte(solarMin).and(solar2.lte(solarMax));
+var solar = solar2.and(solar1)
 
-  var populationVisParams = {
-    min: 0,
-    max: 1,
-    palette: ['black', 'green']
-  };
-  
-  // -------------------------------------------------------------------------------------------------------------------------
-  // Bare Land data (2024)
-  var dynamicWorld = ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1")
-    .filterDate('2024-01-01', '2024-12-31')
-    .select('bare');
+// -----------------------------------------------------------------------------------------------------------------------
 
-  var dynamicWorld2 = ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1")
-    .filterDate('2024-01-01', '2024-12-31')
-    .select('label');
+var wind_u = dataset.select('u_component_of_wind_10m').mean();
+var wind_v = dataset.select('v_component_of_wind_10m').mean();
 
-  var bareProb2_pak = dynamicWorld2.mean().clip(Pak_Districts);
-  var bareProbfiltered1_pak = bareProb2_pak.gt(6);
-  var bareProbfiltered2_pak = bareProbfiltered1_pak.lt(8);
-  var bareProbfiltered1 = bareProbfiltered1_pak.and(bareProbfiltered2_pak)
-  
-  var bareProb2_buffer = dynamicWorld2.mean().clip(outsideBuffer1);
-  var bareProbfiltered1_buffer = bareProb2_buffer.gt(6);
-  var bareProbfiltered2_buffer = bareProbfiltered1_buffer.lt(8);
-  var bareProbfiltered2 = bareProbfiltered1_buffer.and(bareProbfiltered2_buffer)
-  
-  var bareLand = bareProbfiltered2.and(bareProbfiltered1)  // we filter bare land areas with value between 6 and 8
+// windspeed filtered
+var windSpeed1 = wind_u.pow(2).add(wind_v.pow(2)).sqrt().clip(Pak_Districts);
+var windSpeedFilterpak = windSpeed1.gte(windMin).and(windSpeed1.lte(windMax));
+var windSpeed2 = wind_u.pow(2).add(wind_v.pow(2)).sqrt().clip(outsideBuffer1);
+var windSpeedFilterbuf = windSpeed2.gte(windMin).and(windSpeed2.lte(windMax));
+var windSpeed = windSpeedFilterpak.and(windSpeedFilterbuf) // main wind speed
 
-  // -------------------------------------------------------------------------------------------------------------------------
-  
-  // we combine low population areas with bare land areas
-  var lowPopulationBareLand = bareLand.and(populationFiltered);
-  
-  // we combine low population, bare land, and final suitable areas
-  var finalSuitableAreas = finalFiltered.and(lowPopulationBareLand);
-  
-  // ------------------------------------------------------------------------------------------------------------------------
-  
-  // we convert the raster data into vector data
-  var vectorData = finalSuitableAreas.updateMask(finalSuitableAreas)
-  .reduceToVectors({
-    reducer: ee.Reducer.countEvery(), // we count how many pixels in each region to create polygons
-    geometry: outsideBuffer1,
-    scale: 500,  // for increased resolution
-    geometryType: 'polygon',
-    eightConnected: true,  // added for better diagonal connection
-    maxPixels: 1e13,
-    tileScale: 16  // scaled for parallel processing
-  })
-  .filter(ee.Filter.gt('count', 1));  // we filter out polygons with single pixels - to reduce complexity
+// wind direction filtered
+var windDir1 = wind_u.atan2(wind_v).multiply(180 / Math.PI).add(180).clip(Pak_Districts);
+var southwestWindpak = windDir1.gt(180).and(windDir1.lt(270));
+var northeastWindpak = windDir1.gt(0).and(windDir1.lt(90));
+var windDirMask1 = southwestWindpak.or(northeastWindpak);
 
-  var simplifiedVectors = vectorData.map(function(f) {  // we simplify geometries to reduce complexity
-    return f.simplify({maxError: 50});  // geometry can have upto 100m deviation from the original geometry
-  });
-  
-  var vectorInBufferZone = simplifiedVectors.map(function(feature) { // we clip the vectors to the area between Buffer 1 and Buffer 2
-    return feature.intersection(outsideBuffer1, ee.ErrorMargin(100)); // we clip the vectors to the area in the buffer zone
-  });
-  
-  // -----------------------------------------------------------------------------------------------
-  
-  Map.layers().reset();
-  Map.addLayer(populationFiltered, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Areas with population below threshold');
-  Map.addLayer(bareLand, {min: 0, max: 1, palette: ['white', 'brown']}, 'Classified Land areas');
-  Map.addLayer(finalFiltered, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Suitable Areas across the City (Raster)');
-  Map.addLayer(vectorInBufferZone, {color: 'blue', opacity: 0.5}, 'Final Suitable Areas for the City (Vector)'); // we highlight the vectors between buffer 1 and buffer 2
-  
+var windDir2 = wind_u.atan2(wind_v).multiply(180 / Math.PI).add(180).clip(outsideBuffer1);
+var southwestWindbuf = windDir2.gt(180).and(windDir2.lt(270));
+var northeastWindbuf = windDir2.gt(0).and(windDir2.lt(90));
+var windDirMask2 = southwestWindbuf.or(northeastWindbuf);
+
+var windDirMask = windDirMask2.and(windDirMask1); // main wind direction
+
+// wind speed filter
+var windSpeedFilter = windSpeedFilterbuf.and(windSpeedFilterpak) 
+var filteredWind = windSpeedFilter.and(windDirMask);
+
+// solar radiation filter
+var solarRadiationFilter = solarRadiationFilter2.and(solarRadiationFilter1)
+
+// final combined filter
+var finalFiltered = solarRadiationFilter.and(filteredWind);
+
+// -------------------------------------------------------------------------------------------------------------------------
+
+// Population data for 2025
+var image2025 = ee.Image('JRC/GHSL/P2023A/GHS_POP/2025').select('population_count');
+var populationThresholdlocal = populationThreshold;
+
+var population2025_1 = image2025.clip(Pak_Districts);
+var populationMasked1 = population2025_1.updateMask(population2025_1.gte(0));
+var populationFiltered1 = populationMasked1.lte(populationThresholdlocal);
+
+var population2025_2 = image2025.clip(outsideBuffer1);
+var populationMasked2 = population2025_2.updateMask(population2025_2.gte(0));
+var populationFiltered2 = populationMasked2.lte(populationThresholdlocal);
+
+var populationFiltered =  populationFiltered2.and(populationFiltered1) // we filter areas with population <= threshold
+
+var populationVisParams = {
+  min: 0,
+  max: 1,
+  palette: ['black', 'green']
+};
+
+// -------------------------------------------------------------------------------------------------------------------------
+// Bare Land data (2024)
+var dynamicWorld = ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1")
+  .filterDate('2024-01-01', '2024-12-31')
+  .select('bare');
+
+var dynamicWorld2 = ee.ImageCollection("GOOGLE/DYNAMICWORLD/V1")
+  .filterDate('2024-01-01', '2024-12-31')
+  .select('label');
+
+var bareProb2_pak = dynamicWorld2.mean().clip(Pak_Districts);
+var bareProbfiltered1_pak = bareProb2_pak.gt(6);
+var bareProbfiltered2_pak = bareProbfiltered1_pak.lt(8);
+var bareProbfiltered1 = bareProbfiltered1_pak.and(bareProbfiltered2_pak)
+
+var bareProb2_buffer = dynamicWorld2.mean().clip(outsideBuffer1);
+var bareProbfiltered1_buffer = bareProb2_buffer.gt(6);
+var bareProbfiltered2_buffer = bareProbfiltered1_buffer.lt(8);
+var bareProbfiltered2 = bareProbfiltered1_buffer.and(bareProbfiltered2_buffer)
+
+var bareLand = bareProbfiltered2.and(bareProbfiltered1)  // we filter bare land areas with value between 6 and 8
+
+// -------------------------------------------------------------------------------------------------------------------------
+
+// we combine low population areas with bare land areas
+var lowPopulationBareLand = bareLand.and(populationFiltered);
+
+// we combine low population, bare land, and final suitable areas
+var finalSuitableAreas = finalFiltered.and(lowPopulationBareLand);
+
+// ------------------------------------------------------------------------------------------------------------------------
+
+// we convert the raster data into vector data
+var vectorData = finalSuitableAreas.updateMask(finalSuitableAreas)
+.reduceToVectors({
+  reducer: ee.Reducer.countEvery(), // we count how many pixels in each region to create polygons
+  geometry: outsideBuffer1,
+  scale: 500,  // for increased resolution
+  geometryType: 'polygon',
+  eightConnected: true,  // added for better diagonal connection
+  maxPixels: 1e13,
+  tileScale: 16  // scaled for parallel processing
+})
+.filter(ee.Filter.gt('count', 1));  // we filter out polygons with single pixels - to reduce complexity
+
+var simplifiedVectors = vectorData.map(function(f) {  // we simplify geometries to reduce complexity
+  return f.simplify({maxError: 50});  // geometry can have upto 50m deviation from the original geometry
+});
+
+var vectorInBufferZone = simplifiedVectors.map(function(feature) { // we clip the vectors to the area between Buffer 1 and Buffer 2
+  return feature.intersection(outsideBuffer1, ee.ErrorMargin(100)); // we clip the vectors to the area in the buffer zone
+});
+
+// -----------------------------------------------------------------------------------------------
+
+
+Map.layers().reset();
+Map.addLayer(solarRadiationFilter, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Areas with filtered Solar Radiation');
+Map.addLayer(filteredWind, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Areas with filtered Wind');
+Map.addLayer(finalFiltered, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Areas with filtered Wind & Solar');
+Map.addLayer(populationFiltered, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Areas with population below threshold');
+Map.addLayer(bareLand, {min: 0, max: 1, palette: ['white', 'brown']}, 'Classified Land areas');
+Map.addLayer(finalSuitableAreas, {min: 0, max: 1, palette: ['Black', 'Green']}, 'Suitable Areas across the City (Raster)');
+Map.addLayer(vectorInBufferZone, {color: 'blue', opacity: 0.5}, 'Final Suitable Areas for the City (Vector)'); // we highlight the vectors between buffer 1 and buffer 2
+
 }
 
 var applyButton = ui.Button({
-  label: 'Run Analysis',
-  onClick: applyFilters, 
-  style: {stretch: 'horizontal', margin: '10px 5px'}
+label: 'Run Analysis',
+onClick: applyFilters, 
+style: {stretch: 'horizontal', margin: '10px 5px'}
 });
 
 var title = ui.Label({ 
-    value: 'Optimal Areas for Combined Solar-Wind Plants in Pakistan ☀️ 💨',
-    style: {fontWeight: 'bold', fontSize: '17px', margin: '5px 0px'}
+  value: 'Optimal Areas for Combined Solar-Wind Plants in Pakistan ☀️ 💨',
+  style: {fontWeight: 'bold', fontSize: '17px', margin: '5px 0px'}
 });
 
 var aboutPanel = ui.Panel({
+
+widgets: [
+  ui.Label({
+    value: 'About:',
+    style: {fontWeight: 'bold', fontSize: '20px', margin: '10px 5px'}
+  }),
+  ui.Label({
+    value: 'This project identifies optimal locations for combined solar-wind plants based on solar radiation, wind speed, Land-cover/Land-use and low population areas over the last 40 years.',
+    style: {fontSize: '16px', margin: '10px 5px'}
+  }),
+  ui.Label({
+    value: 'The datasets used for the input layers for this project are as follows:',
+    style: {fontSize: '16px', margin: '10px 5px'}
+  }),
+  ui.Label({
+    value: 'ERA5-Land Monthly Aggregated',
+    style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
+  }).setUrl('https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR'),
+  ui.Label({
+    value: 'Global population surfaces 1975-2030',
+    style: {fontSize: '16px', margin: '10px 5px'}
+  }).setUrl('https://developers.google.com/earth-engine/datasets/catalog/JRC_GHSL_P2023A_GHS_POP'),
+  ui.Label({
+    value: 'Dynamic World V1',
+    style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
+  }).setUrl('https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_DYNAMICWORLD_V1'),
+  ui.Label({
+    value: 'Project Overview Document',
+    style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
+  }).setUrl('https://docs.google.com/document/d/1e-t0nxs4JK1hlO7tf1IDhi22EbfZK-8xcMOMjlbjMUU/edit?usp=sharing'),
+  ui.Label({
+    value: 'Github Repository',
+    style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
+  }).setUrl('https://github.com/Jibran023/Optimal-areas-for-combined-Solar-Wind-plants-in-Pakistan'),
+  ui.Button({
+    label: 'Close',
+    onClick: function() {
+      aboutPanel.style().set('shown', false);
+    }
+  })
   
-  widgets: [
-    ui.Label({
-      value: 'About:',
-      style: {fontWeight: 'bold', fontSize: '20px', margin: '10px 5px'}
-    }),
-    ui.Label({
-      value: 'This project identifies optimal locations for combined solar-wind plants based on solar radiation, wind speed, Land-cover/Land-use and low population areas over the last 40 years.',
-      style: {fontSize: '16px', margin: '10px 5px'}
-    }),
-    ui.Label({
-      value: 'The datasets used for the input layers for this project are as follows:',
-      style: {fontSize: '16px', margin: '10px 5px'}
-    }),
-    ui.Label({
-      value: 'ERA5-Land Monthly Aggregated',
-      style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
-    }).setUrl('https://developers.google.com/earth-engine/datasets/catalog/ECMWF_ERA5_LAND_MONTHLY_AGGR'),
-    ui.Label({
-      value: 'Global population surfaces 1975-2030',
-      style: {fontSize: '16px', margin: '10px 5px'}
-    }).setUrl('https://developers.google.com/earth-engine/datasets/catalog/JRC_GHSL_P2023A_GHS_POP'),
-    ui.Label({
-      value: 'Dynamic World V1',
-      style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
-    }).setUrl('https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_DYNAMICWORLD_V1'),
-    ui.Label({
-      value: 'Project Overview Document',
-      style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
-    }).setUrl('https://docs.google.com/document/d/1e-t0nxs4JK1hlO7tf1IDhi22EbfZK-8xcMOMjlbjMUU/edit?usp=sharing'),
-    ui.Label({
-      value: 'Github Repository',
-      style: {fontSize: '16px', margin: '10px 5px', whiteSpace: 'nowrap'}
-    }).setUrl('https://github.com/Jibran023/Optimal-areas-for-combined-Solar-Wind-plants-in-Pakistan'),
-    ui.Button({
-      label: 'Close',
-      onClick: function() {
-        aboutPanel.style().set('shown', false);
-      }
-    })
-    
-  ],
-  style: { 
-    width: '300px', 
-    position: 'top-center',
-    backgroundColor: 'white',
-    padding: '10px',
-    border: '1px solid black',
-    shown: false // initial visibility state
-  }
+],
+style: { 
+  width: '300px', 
+  position: 'top-center',
+  backgroundColor: 'white',
+  padding: '10px',
+  border: '1px solid black',
+  shown: false // initial visibility state
+}
 });
 
 ui.root.add(aboutPanel);
 var aboutButton = ui.Button({
-  label: 'About',
-  onClick: function() {
-    var currentVisibility = aboutPanel.style().get('shown');
-    aboutPanel.style().set('shown', !currentVisibility);
-  },
-  style: {stretch: 'horizontal', margin: '10px 5px'}
+label: 'About',
+onClick: function() {
+  var currentVisibility = aboutPanel.style().get('shown');
+  aboutPanel.style().set('shown', !currentVisibility);
+},
+style: {stretch: 'horizontal', margin: '10px 5px'}
 });
 
 
 
 var legendEntries = [ //  colors and their labels for the legend
-  {
-    title: 'Population Layer', 
-    entries: [
-      {label: 'Population Areas below threshold', color: 'green'},
-      {label: 'Population Areas above threshold', color: 'black'}
-    ]
-  },
-  {
-    title: 'Land Classified Layer',
-    entries: [
-      {label: 'No Bare Land', color: 'grey'},
-      {label: 'Bare Land', color: 'brown'}
-    ]
-  },
-  {
-    title: 'Suitable Areas Across City (Raster) Layer', 
-    entries: [
-      {label: 'Suitable Areas', color: 'green'},
-      {label: 'Not Suitable Areas', color: 'black'}
-    ]
-  },
-  {
-    title: 'Suitable Areas for the City (Vector)',
-    entries: [
-      {label: 'Suitable Vectors', color: 'blue'}
-    ]
-  }
+{
+  title: 'Suitable Areas with filtererd Solar Radiation Layer',
+  entries: [
+    {label: 'Suitable Areas', color: 'green'},
+    {label: 'Not Suitable Areas', color: 'black'}
+  ]
+},
+{
+  title: 'Suitable Areas with filtererd Wind Layer',
+  entries: [
+    {label: 'Suitable Areas', color: 'green'},
+    {label: 'Not Suitable Areas', color: 'black'}
+  ]
+},
+{
+  title: 'Suitable Areas with filtererd Wind & Solar Layer',
+  entries: [
+    {label: 'Suitable Areas', color: 'green'},
+    {label: 'Not Suitable Areas', color: 'black'}
+  ]
+},
+{
+  title: 'Population Layer', 
+  entries: [
+    {label: 'Population Areas below threshold', color: 'green'},
+    {label: 'Population Areas above threshold', color: 'black'}
+  ]
+},
+{
+  title: 'Classified Land Layer',
+  entries: [
+    {label: 'No Bare Land', color: 'grey'},
+    {label: 'Bare Land', color: 'brown'}
+  ]
+},
+{
+  title: 'Suitable Areas Across City (Raster) Layer', 
+  entries: [
+    {label: 'Suitable Areas', color: 'green'},
+    {label: 'Not Suitable Areas', color: 'black'}
+  ]
+},
+{
+  title: 'Suitable Areas for the City (Vector)',
+  entries: [
+    {label: 'Suitable Vectors', color: 'blue'}
+  ]
+}
 ];
 
 
 function createLegend(entries) { // creating the legend panel
-  var legendPanel = ui.Panel({
-    style: {
-      position: 'top-right',  
-      padding: '8px 15px',
-      backgroundColor: 'white',
-      border: '1px solid #bdbdbd',
-      width: '270px'
-    }
+var legendPanel = ui.Panel({
+  style: {
+    position: 'top-right',  
+    padding: '8px 15px',
+    backgroundColor: 'white',
+    border: '1px solid #bdbdbd',
+    width: '270px'
+  }
+});
+
+
+entries.forEach(function(entryGroup) { // we loop through the legend entries and add each group with its title and colors
+  var groupTitle = ui.Label({ // we add the title for the group
+    value: entryGroup.title, // Layer title -> Population layer for example
+    style: {fontWeight: 'bold', fontSize: '14px', margin: '10px 0'}
   });
+  legendPanel.add(groupTitle);
 
-  
-  entries.forEach(function(entryGroup) { // we loop through the legend entries and add each group with its title and colors
-    var groupTitle = ui.Label({ // we add the title for the group
-      value: entryGroup.title, // Layer title -> Population layer for example
-      style: {fontWeight: 'bold', fontSize: '14px', margin: '10px 0'}
+  entryGroup.entries.forEach(function(entry) { // we loop through the individual entries and add the color circle and label
+    var colorCircle = ui.Label({
+      style: {
+        backgroundColor: entry.color,  
+        width: '20px',  
+        height: '20px', 
+        borderRadius: '50%', 
+        margin: '0 10px 0 0' 
+      }
     });
-    legendPanel.add(groupTitle);
 
-    entryGroup.entries.forEach(function(entry) { // we loop through the individual entries and add the color circle and label
-      var colorCircle = ui.Label({
-        style: {
-          backgroundColor: entry.color,  
-          width: '20px',  
-          height: '20px', 
-          borderRadius: '50%', 
-          margin: '0 10px 0 0' 
-        }
-      });
-
-      var label = ui.Label({
-        value: entry.label, 
-        style: {fontSize: '12px'}
-      });
-
-      
-      var entryPanel = ui.Panel({ // panel for each entry (circle and label) and adding it to the legend panel
-        widgets: [colorCircle, label],
-        layout: ui.Panel.Layout.Flow('horizontal')  // widgets horizontally now
-      });
-
-      legendPanel.add(entryPanel);  // adding the entry panel to the legend panel
+    var label = ui.Label({
+      value: entry.label, 
+      style: {fontSize: '12px'}
     });
+
+    
+    var entryPanel = ui.Panel({ // panel for each entry (circle and label) and adding it to the legend panel
+      widgets: [colorCircle, label],
+      layout: ui.Panel.Layout.Flow('horizontal')  // widgets horizontally now
+    });
+
+    legendPanel.add(entryPanel);  // adding the entry panel to the legend panel
   });
+});
 
-  return legendPanel;
+return legendPanel;
 }
 
 var legend = createLegend(legendEntries); // adding legend to the UI
@@ -430,18 +451,18 @@ var legend = createLegend(legendEntries); // adding legend to the UI
 ui.root.add(legend);
 
 var filterPanel = ui.Panel({
-  widgets: [
-    title,
-    aboutButton,
-    cityDropdown,
-    ui.Label('Minimum distance to the city (kms):'), bufferSize1Input,
-    ui.Label('Maximum distance to the city (kms):'), bufferSize2Input,
-    ui.Label('Maximum Population per 100m^2:'), populationThresholdInput,
-    ui.Label('Solar Radiation Range (W/m^2):'), solarMinInput, solarMaxInput,
-    ui.Label('Wind Speed Range (m/s):'), windMinInput, windMaxInput,
-    applyButton
-  ],
-  style: {width: '300px'}
+widgets: [
+  title,
+  aboutButton,
+  cityDropdown,
+  ui.Label('Minimum distance to the city (kms):'), bufferSize1Input,
+  ui.Label('Maximum distance to the city (kms):'), bufferSize2Input,
+  ui.Label('Maximum Population per 100m^2:'), populationThresholdInput,
+  ui.Label('Solar Radiation Range (W/m^2):'), solarMinInput, solarMaxInput,
+  ui.Label('Wind Speed Range (m/s):'), windMinInput, windMaxInput,
+  applyButton
+],
+style: {width: '300px'}
 });
 
 ui.root.widgets().add(filterPanel);
